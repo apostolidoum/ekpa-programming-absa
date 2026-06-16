@@ -48,5 +48,5 @@ This reads `data/ABSA16_Restaurants_Train_SB1_v2.xml` and writes 10 XML part fil
 uv run utils.py
 ```
 
-This writed 10 csv files to `data/`.
+This writes 10 csv files to `data/`.
 
