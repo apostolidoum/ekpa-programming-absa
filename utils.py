@@ -5,6 +5,20 @@ import pandas as pd
 def xml_to_dataframe(xml_filepath):
     """
     Parses an XML part file and converts it into a flattened pandas DataFrame.
+    Data Format
+
+    Each row in the CSV files represents one opinion annotation with the following columns:
+
+    | Column        | Description                                      |
+    |---------------|--------------------------------------------------|
+    | `review_id`   | Unique identifier for the review                 |
+    | `sentence_id` | Unique identifier for the sentence               |
+    | `text`        | The raw sentence text                            |
+    | `target`      | The opinion target (e.g., `"food"`, `"NULL"`)    |
+    | `category`    | The aspect category (e.g., `FOOD#QUALITY`)       |
+    | `polarity`    | Sentiment polarity (`positive`, `negative`, `neutral`) |
+
+    Sentences with no annotated opinions are still included, with `target`, `category`, and `polarity` set to `None`.
     """
     try:
         tree = ET.parse(xml_filepath)
@@ -74,6 +88,7 @@ def xml_to_dataframe(xml_filepath):
 
 def save_csv(df, filename, output_dir):
     """Save a dataframe to csv at the output directory under the specified filename"""
+
     df.to_csv(f"{output_dir}/{filename}.csv", index=False, encoding="utf-8")
     print(f"Dataframe saved to {output_dir}/{filename}.csv")
 
