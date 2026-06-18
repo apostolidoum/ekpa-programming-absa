@@ -20,6 +20,7 @@ The main workflow:
 │   └── part1.csv – part10.csv                 # Corresponding CSV files
 ├── split.py        # Splits the XML dataset into equal-sized chunks
 ├── utils.py        # Parses XML parts into pandas DataFrames; saves CSVs
+├── train.py        # trains models and saves them to disk
 ├── pyproject.toml
 └── README.md
 ```
