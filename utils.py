@@ -1,4 +1,6 @@
+import os
 import xml.etree.ElementTree as ET
+
 import pandas as pd
 
 
@@ -91,6 +93,17 @@ def save_csv(df, filename, output_dir):
 
     df.to_csv(f"{output_dir}/{filename}.csv", index=False, encoding="utf-8")
     print(f"Dataframe saved to {output_dir}/{filename}.csv")
+
+
+def concatenate_data(files_to_use):
+    """Takes a list of xml filenames and returns a dataframe with the concatenation of the data"""
+
+    dataframes = []
+    for file in files_to_use:
+        df = xml_to_dataframe(os.path.join("data", file))
+        dataframes.append(df)
+
+    return pd.concat(dataframes, ignore_index=True)
 
 
 if __name__ == "__main__":
