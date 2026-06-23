@@ -205,6 +205,89 @@ def svm_one_hot(
 
     with open(output_file, "wb") as f:
         pickle.dump(pipeline, f)
+        print(f"svm_onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{C}.pkl saved to {models_path}")
+
+
+import argparse
+
+
+def main(files_to_use):
+    parser = argparse.ArgumentParser(
+        description='Run logistic regression on text features'
+    )
+
+    parser.add_argument(
+        '--model',
+        choices=['svm-tf', 'svm-oh', 'logr-tf', 'logr-oh'],
+        default='logr-tf',
+        help='Model type to use (default: logr-tf)'
+    )
+
+    # Optional arguments
+    parser.add_argument(
+        '--ngram-range',
+        type=int,
+        nargs=2,
+        default=[1, 3],
+        metavar=('MIN', 'MAX'),
+        help='N-gram range (default: 1 3)'
+    )
+
+    parser.add_argument(
+        '--max-iter',
+        type=int,
+        default=1000,
+        help='Maximum iterations (default: 1000)'
+    )
+
+    parser.add_argument(
+        '--C',
+        type=float,
+        default=1.0,
+        help='Regularization parameter (default: 1.0)'
+    )
+
+    parser.add_argument(
+        '--models-path',
+        default='models',
+        help='Path to save models (default: models)'
+    )
+
+    args = parser.parse_args()
+
+    common_params = {
+        'files_to_use': files_to_use,
+        'ngram_range': tuple(args.ngram_range),
+        'max_iter': args.max_iter,
+        'C': args.C,
+        'models_path': args.models_path
+    }
+
+    # Choose model based on argument ['svm-tf', 'svm-oh', 'logr-tf', 'logr-oh']
+    if args.model == 'svm-tf':
+        svm_text_features(**common_params)
+    elif args.model == 'svm-oh':
+        svm_one_hot(**common_params)
+    elif args.model == 'logr-tf':
+        logistic_regression_text_features(**common_params)
+    elif args.model == 'logr-oh':
+        logistic_regression_one_hot(**common_params)
+
+
+
+if __name__ == '__main__':
+    main([
+            "part1.xml",
+            "part2.xml",
+            "part3.xml",
+            "part4.xml",
+            "part5.xml",
+            "part6.xml",
+            "part7.xml",
+            "part8.xml",
+            "part9.xml",
+            "part10.xml",
+        ])
 
 
 # logistic_regression_text_features(
