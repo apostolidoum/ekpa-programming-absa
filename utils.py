@@ -1,5 +1,6 @@
 import os
 import xml.etree.ElementTree as ET
+import pickle
 
 import pandas as pd
 
@@ -105,6 +106,55 @@ def concatenate_data(files_to_use):
 
     return pd.concat(dataframes, ignore_index=True)
 
+
+def has_preprocessor(clf):
+    return 'preprocessor' in clf.named_steps
+
+def get_feature_dimensionality(clf):
+    return clf['classifier'].coef_.shape
+
+
+def split_features_from_target(df: pd.DataFrame, key='one-hot'):
+    # Explicitly pull your feature columns and your label column by name
+    feature_cols = ["text", "target", "category"]
+
+    if isinstance(df, str):
+        df = concatenate_data([df])
+
+    df = df.dropna()
+
+    X = df[feature_cols]
+    y = df["polarity"]  # Replace "sentiment" with your actual exact target column name
+
+    if key == 'one-hot':
+        X["combined_text"] = X["text"] + " " + X["target"]
+        # Explicitly returns a 2-column DataFrame containing all rows
+        X = X[["combined_text", "category"]]
+    else:
+        X = X["text"] + " " + X["target"] + " " + X["category"]
+
+    return X, y
+
+
+def load_model(path):
+
+    with open(path, "rb") as f:
+        clf = pickle.load(f)
+
+    return clf
+
+# def prepare_features(df: pd.DataFrame, key='one-hot'):
+#     # Work on a copy to prevent SettingWithCopyWarning in Pandas
+#     df = df.copy()
+#
+#     if key == 'one-hot':
+#         df["combined_text"] = df["text"] + " " + df["target"]
+#         # Explicitly returns a 2-column DataFrame containing all rows
+#         X = df[["combined_text", "category"]]
+#     else:
+#         X = df["text"] + " " + df["target"] + " " + df["category"]
+#
+#     return X
 
 if __name__ == "__main__":
     # go over all the parts in the data folder and save them to csv
