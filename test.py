@@ -23,27 +23,18 @@ from utils import (
 )
 
 
-
-
 def build_model(function, train_set, **kwargs):
     path = function(train_set, **kwargs)
     return path
 
 
-def plot_conf_matrix(y, yhat, model, model_type, metrics_dir=METRICS_DIR):
-    # 1. Plot the Distribution of Predictions
-    plt.figure(figsize=(10, 4))
 
-    plt.subplot(1, 2, 1)
-    sns.countplot(x=yhat, palette="viridis")
-    plt.title("Predicted Class Distribution")
-    plt.xlabel("Sentiment Class")
-    plt.ylabel("Count")
+def plot_conf_matrix(cm, model_type, metrics_dir=METRICS_DIR):
+    # 1. Plot the Distribution of Predictions
+    plt.figure(figsize=(6, 5))
 
     # 2. Plot Confusion Matrix (Comparing preds to true labels y)
-    plt.subplot(1, 2, 2)
-    cm = confusion_matrix(y, yhat)
-    labels = [l if l else "Broken" for l in model.classes_]
+    labels = ['negative', 'neutral', 'positive'] #[l if l else "Broken" for l in model.classes_]
     sns.heatmap(
         cm,
         annot=True,
@@ -61,7 +52,7 @@ def plot_conf_matrix(y, yhat, model, model_type, metrics_dir=METRICS_DIR):
     print(model_type)
     plt.savefig(Path(metrics_dir, f"{model_type}_confusion_matrix.png"))
 
-    return plt
+    return cm
 
 
 def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR):
@@ -86,8 +77,8 @@ def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR):
     if preds.ndim > 1:
         preds = np.argmax(preds, axis=1)
 
-    cm = plot_conf_matrix(y, preds, clf, split_id, model_id)
-    # cm.show()
+    cm = confusion_matrix(y, preds)
+    plot_conf_matrix(cm, split_id, model_id)
 
     clr = classification_report(y, preds, output_dict=True)
 

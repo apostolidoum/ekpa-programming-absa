@@ -56,7 +56,7 @@ def logistic_regression_text_features(
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"ngram_{ngram_range}_max_iter_{max_iter}_C_{C}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
     )
 
     with open(output_file, "wb") as f:
@@ -123,7 +123,7 @@ def logistic_regression_one_hot(
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{C}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
     )
 
     with open(output_file, "wb") as f:
@@ -174,7 +174,7 @@ def svm_text_features(
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"svm_ngram_{ngram_range}_max_iter_{max_iter}_C_{C}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"svm_ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
     )
 
     with open(output_file, "wb") as f:
@@ -238,7 +238,7 @@ def svm_one_hot(
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"svm_onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{C}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"svm_onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
     )
 
     with open(output_file, "wb") as f:
