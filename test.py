@@ -76,7 +76,6 @@ def evaluate_model(clf:str, test_set: str):
     df = concatenate_data([test_set])
     key = "one-hot" if has_preprocessor(clf) else "text_f"
 
-    classifier_step = clf.named_steps["classifier"]
     print(f"Model Type: {model_id}")
 
     X, y = split_features_from_target(df, key)
