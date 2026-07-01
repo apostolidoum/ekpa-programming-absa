@@ -81,6 +81,7 @@ def plot_conf_matrix(y, yhat, model_type, metrics_dir="metrics"):
 
 
 def evaluate_model(clf, *test_set: str):
+    # TODO maybe split ploting logic from accuracy results?
 
     if isinstance(clf, str):
         if "models/" in clf:
@@ -109,13 +110,19 @@ def evaluate_model(clf, *test_set: str):
     return clr["accuracy"]
 
 
-test_files = ["part1.xml"]
-train_files = [f for f in full_dataset if f not in test_files]
+def main():
+    test_files = ["part1.xml"]
+    train_files = [f for f in full_dataset if f not in test_files]
 
-X_test, y_test = split_features_from_target(*test_files)
+    df_test = concatenate_data(test_files)
+    X_test, y_test = split_features_from_target(df_test)
 
-model = load_model("models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0.pkl")
+    model = load_model("models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0.pkl")
 
-evaluate_model(model, "part3.xml")
+    evaluate_model(model, "part1.xml")
 
-print(get_feature_dimensionality(model))
+    print(get_feature_dimensionality(model))
+
+
+if __name__ == "__main__":
+    main()
