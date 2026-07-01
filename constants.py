@@ -1,3 +1,5 @@
+from pathlib import Path
+
 full_dataset = [
     "part1.xml",
     "part2.xml",
@@ -10,3 +12,8 @@ full_dataset = [
     "part9.xml",
     "part10.xml",
 ]
+
+PROJECT_DIR = Path(__file__).parent
+DATA_DIR = PROJECT_DIR / "data"
+METRICS_DIR = PROJECT_DIR / "metrics"
+MODELS_DIR = PROJECT_DIR / "models"

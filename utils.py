@@ -1,8 +1,9 @@
 import os
 import xml.etree.ElementTree as ET
 import pickle
-
+from pathlib import Path, PurePath
 import pandas as pd
+from constants import DATA_DIR
 
 
 def xml_to_dataframe(xml_filepath):
@@ -89,7 +90,7 @@ def xml_to_dataframe(xml_filepath):
     return df
 
 
-def save_csv(df, filename, output_dir):
+def save_csv(df, filename, output_dir=DATA_DIR):
     """Save a dataframe to csv at the output directory under the specified filename"""
 
     df.to_csv(f"{output_dir}/{filename}.csv", index=False, encoding="utf-8")
@@ -113,10 +114,10 @@ def has_preprocessor(clf):
 
 def get_feature_dimensionality(clf:str):
 
-    if "models/" in clf:
+    if "models" in PurePath(clf).parts:
         clf = load_model(clf)
     else:
-        clf = load_model(os.path.join("models", clf))
+        clf = load_model(Path("models", clf))
 
     return clf["classifier"].coef_.shape
 
@@ -148,6 +149,10 @@ def load_model(path):
     return clf
 
 
+def get_model_name_from_path(path:Path):
+    model_name = path.stem
+    return model_name
+
 # def prepare_features(df: pd.DataFrame, key='one-hot'):
 #     # Work on a copy to prevent SettingWithCopyWarning in Pandas
 #     df = df.copy()
@@ -163,7 +168,6 @@ def load_model(path):
 
 if __name__ == "__main__":
     # go over all the parts in the data folder and save them to csv
-    data_path = "data"
     for i in range(1, 11):
-        df = xml_to_dataframe(f"{data_path}/part{i}.xml")
-        save_csv(df, f"part{i}", data_path)
+        df = xml_to_dataframe(f"{DATA_DIR}/part{i}.xml")
+        save_csv(df, f"part{i}", DATA_DIR)

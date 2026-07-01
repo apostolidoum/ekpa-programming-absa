@@ -1,5 +1,6 @@
 import os
 
+from pathlib import Path, PurePath
 import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -8,10 +9,11 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from constants import full_dataset
+from constants import full_dataset, METRICS_DIR, PROJECT_DIR
 from train import (
     svm_one_hot,
 )
+
 from utils import (
     concatenate_data,
     get_feature_dimensionality,
@@ -21,14 +23,14 @@ from utils import (
 )
 
 
+
+
 def build_model(function, train_set, **kwargs):
-
     path = function(train_set, **kwargs)
-
     return path
 
 
-def plot_conf_matrix(y, yhat, model, model_type, metrics_dir="metrics"):
+def plot_conf_matrix(y, yhat, model, model_type, metrics_dir=METRICS_DIR):
     # 1. Plot the Distribution of Predictions
     plt.figure(figsize=(10, 4))
 
@@ -56,19 +58,19 @@ def plot_conf_matrix(y, yhat, model, model_type, metrics_dir="metrics"):
 
     plt.tight_layout()
     os.makedirs(metrics_dir, exist_ok=True)
-    plt.savefig(os.path.join(metrics_dir, f"{model_type}_confusion_matrix.png"))
+    print(model_type)
+    plt.savefig(Path(metrics_dir, f"{model_type}_confusion_matrix.png"))
 
     return plt
 
 
-def evaluate_model(clf:str, test_set: str):
+def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR):
     # TODO maybe split ploting logic from accuracy results?
 
-    model_id = clf.split('/')[-1].rstrip('.pkl') + f'_{test_set}'
-    print(model_id)
-    print(clf)
+    model_id = Path(dir, Path(clf).stem)
+    split_id = str(model_id.stem) + test_set.rstrip('.xml')
 
-    if "models/" in clf:
+    if "models" in PurePath(clf).parts:
         clf = load_model(clf)
     else:
         clf = load_model(os.path.join("models", clf))
@@ -76,7 +78,7 @@ def evaluate_model(clf:str, test_set: str):
     df = concatenate_data([test_set])
     key = "one-hot" if has_preprocessor(clf) else "text_f"
 
-    print(f"Model Type: {model_id}")
+    print(f"Model Type: {split_id}")
 
     X, y = split_features_from_target(df, key)
 
@@ -84,12 +86,12 @@ def evaluate_model(clf:str, test_set: str):
     if preds.ndim > 1:
         preds = np.argmax(preds, axis=1)
 
-    cm = plot_conf_matrix(y, preds, clf, model_id)
+    cm = plot_conf_matrix(y, preds, clf, split_id, model_id)
     # cm.show()
 
     clr = classification_report(y, preds, output_dict=True)
 
-    return clr["accuracy"]
+    return clr["accuracy"], cm
 
 
 def main():

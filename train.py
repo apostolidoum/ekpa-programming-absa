@@ -1,6 +1,7 @@
 import argparse
 import os
 import pickle
+from pathlib import Path
 
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
@@ -10,7 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import LinearSVC
 
-from constants import full_dataset
+from constants import full_dataset, MODELS_DIR
 from utils import concatenate_data, split_features_from_target
 
 
@@ -19,7 +20,7 @@ def logistic_regression_text_features(
     ngram_range=(1, 3),
     max_iter=1000,
     C=1.0,
-    models_path="models",
+    models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
 ):
@@ -61,7 +62,7 @@ def logistic_regression_text_features(
     with open(output_file, "wb") as f:
         pickle.dump(pipeline, f)
 
-    return output_file
+    return Path(output_file)
 
 
 def logistic_regression_one_hot(
@@ -69,7 +70,7 @@ def logistic_regression_one_hot(
     ngram_range=(1, 3),
     max_iter=1000,
     C=1.0,
-    models_path="models",
+    models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
 ):
@@ -128,7 +129,7 @@ def logistic_regression_one_hot(
     with open(output_file, "wb") as f:
         pickle.dump(pipeline, f)
 
-    return output_file
+    return Path(output_file)
 
 
 def svm_text_features(
@@ -136,7 +137,7 @@ def svm_text_features(
     ngram_range=(1, 3),
     max_iter=1000,
     C=1.0,
-    models_path="models",
+    models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
 ):
@@ -179,7 +180,7 @@ def svm_text_features(
     with open(output_file, "wb") as f:
         pickle.dump(pipeline, f)
 
-    return output_file
+    return Path(output_file)
 
 
 def svm_one_hot(
@@ -187,7 +188,7 @@ def svm_one_hot(
     ngram_range=(1, 3),
     max_iter=1000,
     C=1.0,
-    models_path="models",
+    models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
 ):
@@ -243,7 +244,7 @@ def svm_one_hot(
     with open(output_file, "wb") as f:
         pickle.dump(pipeline, f)
 
-    return output_file
+    return Path(output_file)
 
 
 def main():
