@@ -122,6 +122,16 @@ def get_feature_dimensionality(clf:str):
     return clf["classifier"].coef_.shape
 
 
+def get_reducer(clf:str):
+
+    if "models" in PurePath(clf).parts:
+        clf = load_model(clf)
+    else:
+        clf = load_model(Path("models", clf))
+
+    return clf['reducer']
+
+
 def split_features_from_target(df: pd.DataFrame, key="one-hot"):
     # Explicitly pull your feature columns and your label column by name
     feature_cols = ["text", "target", "category"]
