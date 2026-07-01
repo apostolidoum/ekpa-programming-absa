@@ -61,21 +61,23 @@ def plot_conf_matrix(y, yhat, model, model_type, metrics_dir="metrics"):
     return plt
 
 
-def evaluate_model(clf, *test_set: str):
+def evaluate_model(clf:str, test_set: str):
     # TODO maybe split ploting logic from accuracy results?
 
-    if isinstance(clf, str):
-        if "models/" in clf:
-            clf = load_model(clf)
-        else:
-            clf = load_model(os.path.join("models", clf))
+    model_id = clf.split('/')[-1].rstrip('.pkl') + f'_{test_set}'
+    print(model_id)
+    print(clf)
 
-    df = concatenate_data(list(test_set))
+    if "models/" in clf:
+        clf = load_model(clf)
+    else:
+        clf = load_model(os.path.join("models", clf))
+
+    df = concatenate_data([test_set])
     key = "one-hot" if has_preprocessor(clf) else "text_f"
 
     classifier_step = clf.named_steps["classifier"]
-    model_type_str = type(classifier_step).__name__ + "_" + key
-    print(f"Model Type: {model_type_str}")
+    print(f"Model Type: {model_id}")
 
     X, y = split_features_from_target(df, key)
 
@@ -83,7 +85,7 @@ def evaluate_model(clf, *test_set: str):
     if preds.ndim > 1:
         preds = np.argmax(preds, axis=1)
 
-    cm = plot_conf_matrix(y, preds, clf, model_type_str)
+    cm = plot_conf_matrix(y, preds, clf, model_id)
     # cm.show()
 
     clr = classification_report(y, preds, output_dict=True)
@@ -98,13 +100,11 @@ def main():
 
     print(f"Training a model on {train_files}")
     svm_one_hot(files_to_use=train_files)
-    model = load_model(
-        "models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0_reduce_f_False_n_components_1000.pkl"
-    )
+    model_path = "models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0_reduce_f_False_n_components_1000.pkl"
 
-    acc = evaluate_model(model, "part1.xml")
+    acc = evaluate_model(model_path, "part1.xml")
     print(f"Accuracy on {test_files} is {acc}")
-    print(get_feature_dimensionality(model))
+    print(get_feature_dimensionality(model_path))
 
 
 if __name__ == "__main__":

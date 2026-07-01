@@ -111,7 +111,13 @@ def has_preprocessor(clf):
     return "preprocessor" in clf.named_steps
 
 
-def get_feature_dimensionality(clf):
+def get_feature_dimensionality(clf:str):
+
+    if "models/" in clf:
+        clf = load_model(clf)
+    else:
+        clf = load_model(os.path.join("models", clf))
+
     return clf["classifier"].coef_.shape
 
 
