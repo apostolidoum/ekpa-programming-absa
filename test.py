@@ -8,6 +8,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
+from constants import full_dataset
 from train import (
     svm_one_hot,
 )
@@ -18,19 +19,6 @@ from utils import (
     load_model,
     split_features_from_target,
 )
-
-full_dataset = [
-    "part1.xml",
-    "part2.xml",
-    "part3.xml",
-    "part4.xml",
-    "part5.xml",
-    "part6.xml",
-    "part7.xml",
-    "part8.xml",
-    "part9.xml",
-    "part10.xml",
-]
 
 
 def build_model(function, train_set, **kwargs):
@@ -110,7 +98,9 @@ def main():
 
     print(f"Training a model on {train_files}")
     svm_one_hot(files_to_use=train_files)
-    model = load_model("models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0.pkl")
+    model = load_model(
+        "models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0_reduce_f_False_n_components_1000.pkl"
+    )
 
     acc = evaluate_model(model, "part1.xml")
     print(f"Accuracy on {test_files} is {acc}")
