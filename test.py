@@ -47,7 +47,7 @@ def build_model(function, train_set, **kwargs):
     return path
 
 
-def plot_conf_matrix(y, yhat, model_type, metrics_dir="metrics"):
+def plot_conf_matrix(y, yhat, model, model_type, metrics_dir="metrics"):
     # 1. Plot the Distribution of Predictions
     plt.figure(figsize=(10, 4))
 
@@ -102,7 +102,7 @@ def evaluate_model(clf, *test_set: str):
     if preds.ndim > 1:
         preds = np.argmax(preds, axis=1)
 
-    cm = plot_conf_matrix(y, preds, model_type_str)
+    cm = plot_conf_matrix(y, preds, clf, model_type_str)
     cm.show()
 
     clr = classification_report(y, preds, output_dict=True)
