@@ -1,29 +1,22 @@
 import os
-import pickle
 
-import pandas as pd
-from matplotlib import pyplot as plt
 import numpy as np
 import seaborn as sns
-from sklearn import feature_selection
+from matplotlib import pyplot as plt
 from sklearn.metrics import (
-    confusion_matrix,
-    zero_one_loss,
     classification_report,
-    mutual_info_score,
+    confusion_matrix,
+)
+
+from train import (
+    svm_one_hot,
 )
 from utils import (
     concatenate_data,
-    split_features_from_target,
-    load_model,
     get_feature_dimensionality,
     has_preprocessor,
-)
-from train import (
-    logistic_regression_text_features,
-    logistic_regression_one_hot,
-    svm_one_hot,
-    svm_text_features,
+    load_model,
+    split_features_from_target,
 )
 
 full_dataset = [
@@ -103,7 +96,7 @@ def evaluate_model(clf, *test_set: str):
         preds = np.argmax(preds, axis=1)
 
     cm = plot_conf_matrix(y, preds, clf, model_type_str)
-    cm.show()
+    # cm.show()
 
     clr = classification_report(y, preds, output_dict=True)
 
@@ -111,16 +104,16 @@ def evaluate_model(clf, *test_set: str):
 
 
 def main():
+    print("Example of using the test code.")
     test_files = ["part1.xml"]
     train_files = [f for f in full_dataset if f not in test_files]
 
-    df_test = concatenate_data(test_files)
-    X_test, y_test = split_features_from_target(df_test)
-
+    print(f"Training a model on {train_files}")
+    svm_one_hot(files_to_use=train_files)
     model = load_model("models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0.pkl")
 
-    evaluate_model(model, "part1.xml")
-
+    acc = evaluate_model(model, "part1.xml")
+    print(f"Accuracy on {test_files} is {acc}")
     print(get_feature_dimensionality(model))
 
 
