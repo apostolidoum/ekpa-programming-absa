@@ -92,7 +92,7 @@ def main():
 
     print(f"Training a model on {train_files}")
     svm_one_hot(files_to_use=train_files)
-    model_path = "models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1.0_reduce_f_False_n_components_1000.pkl"
+    model_path = "models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1-0_reduce_f_False_n_components_1000.pkl"
 
     acc = evaluate_model(model_path, "part1.xml")
     print(f"Accuracy on {test_files} is {acc}")
