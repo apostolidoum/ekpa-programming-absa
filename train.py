@@ -157,7 +157,7 @@ def svm_text_features(
 
     pipeline = Pipeline(
         steps=[
-            ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
+            ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word", )),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
             ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42)),
         ]
@@ -222,7 +222,7 @@ def svm_one_hot(
     pipeline = Pipeline(
         steps=[
             ("preprocessor", preprocessor),
-            ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
+            ("reducer", TruncatedSVD(n_components=n_components, random_state=42)), # TruncatedSVD(n_components=n_components, random_state=42)
             ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42)),
         ]
         if reduce_f

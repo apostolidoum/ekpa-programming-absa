@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pandas as pd
+
 from test import evaluate_model, plot_conf_matrix
 from constants import full_dataset, PROJECT_DIR
 from train import (
@@ -10,6 +12,9 @@ from train import (
     )
 import json
 
+from utils import concatenate_data, xml_to_dataframe
+
+
 def cross_validate( model_builder=svm_one_hot,
                     reduce_f=False,
                     n_components=1000,
@@ -19,19 +24,31 @@ def cross_validate( model_builder=svm_one_hot,
     results = []
     confs = []
     m_path = ""
+    predictions = []
 
     for test_set in full_dataset:
         train_set = [i for i in full_dataset if i != test_set]
 
         model_path = model_builder(train_set, reduce_f=reduce_f, n_components=n_components, ngram_range=ngram_range, **kwargs)
         m_path = model_path
-        acc, cm = evaluate_model(model_path, test_set)
+        acc, cm, (y, preds) = evaluate_model(model_path, test_set)
+
+        categories = concatenate_data([test_set])['category'].dropna().values
+
+        print([len(i) for i in ([test_set in range(len(categories))], categories, y, preds)])
+        predictions.append(pd.DataFrame({"test": [test_set for _ in range(len(categories))],
+                                         "category": categories,
+                                         "truth": y,
+                                         "preds": preds}))
+
         results.append(acc)
         confs.append(cm)
 
     avg = sum(results)/len(results)
     total_confusion = sum(confs)
     plot_conf_matrix(total_confusion, m_path.stem)
+    predictions = pd.concat(predictions)
+    predictions.to_csv(PROJECT_DIR / f"{model_builder.__name__}{ngram_range}_reduce_f_{reduce_f}_n_components_{n_components}_predictions.csv", index=False)
 
     return results, avg
 
