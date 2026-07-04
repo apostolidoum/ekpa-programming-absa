@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import figure
 from utils import concatenate_data
-from constants import PROJECT_DIR, full_dataset
+from constants import PROJECT_DIR, full_dataset, FINAL_RESULTS, DATASET_STATS
 
 
 def group_small_slices(counter_obj, threshold_percent=0.03):
@@ -31,7 +31,7 @@ def group_small_slices(counter_obj, threshold_percent=0.03):
     return main_categories
 
 
-def make_dataset_stats_plots(path=PROJECT_DIR / "stats.json"):
+def make_dataset_stats_plots(path=DATASET_STATS):
     data = json.load(open(path, "r"))
 
     polarities = pd.Series(data["Polarity Distribution"])
@@ -54,7 +54,7 @@ def make_dataset_stats_plots(path=PROJECT_DIR / "stats.json"):
 
 
 def make_results_plots(
-    path=PROJECT_DIR / "predictions.csv", dataset_stats=PROJECT_DIR / "stats.json"
+    path, dataset_stats=DATASET_STATS
 ):
     full_data = json.load(open(dataset_stats, "r"))
     predictions_data = pd.read_csv(path)
@@ -141,7 +141,7 @@ def add_labels(x, y):
 def plot_cross_validation_results_all_models():
     stats = json.load(
         open(
-            "/Users/maria/Documents/DPMS/2nd_semester/programming/ekpa-programming-absa/final_results.json",
+            FINAL_RESULTS,
             "r",
         )
     )
