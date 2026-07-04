@@ -18,4 +18,6 @@ DATA_DIR = PROJECT_DIR / "data"
 METRICS_DIR = PROJECT_DIR / "metrics"
 MODELS_DIR = PROJECT_DIR / "models"
 
+FINAL_RESULTS = PROJECT_DIR / "final_results.json"
+DATASET_STATS = PROJECT_DIR / "stats.json"
 FULL_DATASET_PATH = DATA_DIR / "ABSA16_Restaurants_Train_SB1_v2.xml"
