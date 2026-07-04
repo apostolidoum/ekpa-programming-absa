@@ -1,9 +1,11 @@
+import json
 import os
 import xml.etree.ElementTree as ET
 import pickle
+from collections import Counter
 from pathlib import Path, PurePath
 import pandas as pd
-from constants import DATA_DIR
+from constants import DATA_DIR, FULL_DATASET_PATH, PROJECT_DIR
 
 
 def xml_to_dataframe(xml_filepath):
@@ -112,8 +114,7 @@ def has_preprocessor(clf):
     return "preprocessor" in clf.named_steps
 
 
-def get_feature_dimensionality(clf:str):
-
+def get_feature_dimensionality(clf: str):
     if "models" in PurePath(clf).parts:
         clf = load_model(clf)
     else:
@@ -122,8 +123,7 @@ def get_feature_dimensionality(clf:str):
     return clf["classifier"].coef_.shape
 
 
-def get_reducer(clf:str):
-
+def get_reducer(clf: str):
     if "models" in PurePath(clf).parts:
         clf = load_model(clf)
     else:
@@ -152,16 +152,52 @@ def split_features_from_target(df: pd.DataFrame, key="one-hot"):
 
 
 def load_model(path):
-
     with open(path, "rb") as f:
         clf = pickle.load(f)
 
     return clf
 
 
-def get_model_name_from_path(path:Path):
+def get_portions(stuff: list | pd.Series):
+    counts = Counter(stuff)
+    total = counts.total()
+    portions = {k: (v, (v / total) * 100) for k, v in counts.items()}
+
+    return portions
+
+
+def compute_dataset_statistics(datapath=FULL_DATASET_PATH, portions=False):
+    data: pd.DataFrame = concatenate_data([datapath.name])
+    data = data.dropna()
+
+    polarities = data['polarity']
+    composite_categories = data['category']
+    category_units = [com for cat in composite_categories for com in cat.split('#')]
+
+    unit_count = get_portions(category_units) if portions else Counter(category_units)
+    cat_count = get_portions(composite_categories) if portions else Counter(composite_categories)
+    pol_count = get_portions(polarities) if portions else Counter(polarities)
+
+    n_reviews = data.shape[0]
+
+    stats = {
+        "Number of Reviews": n_reviews,
+        "Polarity Distribution": pol_count,
+        "Composite Categories": cat_count,
+        "Category Unit Count": unit_count,
+
+    }
+
+    address = f"{PROJECT_DIR}/stats.json"
+    json.dump(stats, open(address, "w"))
+    print("Statistics saved to " + address)
+    return address
+
+
+def get_model_name_from_path(path: Path):
     model_name = path.stem
     return model_name
+
 
 # def prepare_features(df: pd.DataFrame, key='one-hot'):
 #     # Work on a copy to prevent SettingWithCopyWarning in Pandas
@@ -178,6 +214,7 @@ def get_model_name_from_path(path:Path):
 
 if __name__ == "__main__":
     # go over all the parts in the data folder and save them to csv
+    print(compute_dataset_statistics())
     for i in range(1, 11):
         df = xml_to_dataframe(f"{DATA_DIR}/part{i}.xml")
         save_csv(df, f"part{i}", DATA_DIR)
