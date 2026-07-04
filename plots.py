@@ -39,37 +39,44 @@ def make_dataset_stats_plots(path=DATASET_STATS):
     ucat = pd.Series(data["Category Unit Count"])
 
     for name, characteristic in zip(
-        ("Pol_", "Comp_", "Unit_"), (polarities, ccat, ucat)
+        ("Polarity Distribution", "Composite Categories Count", "Category Unit Count"), (polarities, ccat, ucat)
     ):
-        x = 5 if name == "Pol_" else 10
+        x = 5 if name == "Polarity Distribution" else 10
         plt.figure(1, figsize=(x, 5))
         plt.bar(characteristic.index, characteristic.values, align="center")
         # Rotate 45 degrees and align the text to the right
         plt.xticks(rotation=45, ha="right")
+        plt.title(name)
+        plt.xlabel("Label")
+        plt.ylabel("Count")
 
         # tight_layout ensures the angled labels don't get cut off at the bottom
         plt.tight_layout()
+        plt.savefig(str(PROJECT_DIR / f"{name}_plot.png"))
+
         plt.show()
-        plt.savefig(str(PROJECT_DIR / f"{name}plot.png"))
 
 
 def make_results_plots(
-    path, dataset_stats=DATASET_STATS
+    path, dataset_stats=DATASET_STATS, split_category_label=False
 ):
     full_data = json.load(open(dataset_stats, "r"))
     predictions_data = pd.read_csv(path)
 
-    # full_category_counts = Counter(full_data["Composite Categories"])
-    full_category_counts = Counter(full_data["Category Unit Count"])
+    full_category_counts = Counter(full_data["Category Unit Count"]) if split_category_label else Counter(full_data["Composite Categories"])
 
     wrong_responses = predictions_data[
         predictions_data["truth"] != predictions_data["preds"]
     ]
     wrong_categories = wrong_responses["category"]
-    wrong_category_components = [
-        com for cat in wrong_categories for com in cat.split("#")
-    ]
-    wrong_category_counts = Counter(wrong_category_components)
+
+    if split_category_label:
+        wrong_category_components = [
+            com for cat in wrong_categories for com in cat.split("#")
+        ]
+        wrong_category_counts = Counter(wrong_category_components)
+    else:
+        wrong_category_counts = Counter(wrong_categories)
 
     grouped_full = group_small_slices(full_category_counts, threshold_percent=0.024)
     grouped_wrong = group_small_slices(wrong_category_counts, threshold_percent=0.024)
@@ -95,7 +102,7 @@ def make_results_plots(
         rotatelabels=True,
         labeldistance=1,
     )
-    # ax1.set_title("Full Category Counts")
+    #ax1.set_title("Full Category Counts")
 
     ax2.pie(
         wrong_values,
@@ -107,10 +114,9 @@ def make_results_plots(
         rotatelabels=True,
         labeldistance=1,
     )
-    # ax2.set_title("Wrong Category Counts")
+    #ax2.set_title("Wrong Category Counts")
 
-    # --- Global Formatting ---
-    plt.suptitle("Full - Category Distribution Comparison - Wrong", fontsize=16)
+    plt.suptitle("Category Distribution Comparison", fontsize=16)
     plt.tight_layout()
     plt.show()
 
@@ -126,6 +132,9 @@ def plot_parts_sizes():
     plt.bar(parts.index, parts.values, align="center")
     # Rotate 45 degrees and align the text to the right
     plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Part")
+    plt.ylabel("Number of Sentences")
+    plt.title("Part Size Distribution")
 
     # tight_layout ensures the angled labels don't get cut off at the bottom
     plt.tight_layout()
@@ -135,7 +144,7 @@ def plot_parts_sizes():
 
 def add_labels(x, y):
     for i in range(len(x)):
-        plt.text(i, y[i], f"{y[i]:.2f}")
+        plt.text(i-0.25, y[i], f"{y[i]:.2f}")
 
 
 def plot_cross_validation_results_all_models():
@@ -145,13 +154,16 @@ def plot_cross_validation_results_all_models():
             "r",
         )
     )
+    plt.figure(1, figsize=(13, 5))
     names = list(stats.keys())
     accuracies = [metrics[1] for key, metrics in stats.items()]
     plt.bar(names, accuracies, align="center")
     add_labels(names, accuracies)
     plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Model")
+    plt.ylabel("Accuracy")
     plt.tight_layout()
     plt.show()
 
 
-plot_cross_validation_results_all_models()
+make_dataset_stats_plots()
