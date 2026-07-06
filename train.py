@@ -13,6 +13,7 @@ from sklearn.svm import LinearSVC
 
 from constants import full_dataset, MODELS_DIR
 from utils import concatenate_data, split_features_from_target
+from sentence_transformers import SentenceTransformer
 
 
 def logistic_regression_text_features(
@@ -43,12 +44,22 @@ def logistic_regression_text_features(
         steps=[
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
+            (
+                "classifier",
+                LogisticRegression(
+                    max_iter=max_iter, C=C, random_state=42, class_weight="balanced"
+                ),
+            ),
         ]
         if reduce_f
         else [
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
+            (
+                "classifier",
+                LogisticRegression(
+                    max_iter=max_iter, C=C, random_state=42, class_weight="balanced"
+                ),
+            ),
         ]
     )
 
@@ -112,12 +123,22 @@ def logistic_regression_one_hot(
         steps=[
             ("preprocessor", preprocessor),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
+            (
+                "classifier",
+                LogisticRegression(
+                    max_iter=max_iter, C=C, random_state=42, class_weight="balanced"
+                ),
+            ),
         ]
         if reduce_f
         else [
             ("preprocessor", preprocessor),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
+            (
+                "classifier",
+                LogisticRegression(
+                    max_iter=max_iter, C=C, random_state=42, class_weight="balanced"
+                ),
+            ),
         ]
     )
 
@@ -163,14 +184,30 @@ def svm_text_features(
 
     pipeline = Pipeline(
         steps=[
-            ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word", )),
+            (
+                "tfidf",
+                TfidfVectorizer(
+                    ngram_range=ngram_range,
+                    analyzer="word",
+                ),
+            ),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, class_weight='balanced', random_state=42)),
+            (
+                "classifier",
+                LinearSVC(
+                    max_iter=max_iter, C=C, class_weight="balanced", random_state=42
+                ),
+            ),
         ]
         if reduce_f
         else [
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, class_weight='balanced', random_state=42)),
+            (
+                "classifier",
+                LinearSVC(
+                    max_iter=max_iter, C=C, class_weight="balanced", random_state=42
+                ),
+            ),
         ]
     )
 
@@ -230,13 +267,26 @@ def svm_one_hot(
     pipeline = Pipeline(
         steps=[
             ("preprocessor", preprocessor),
-            ("reducer", TruncatedSVD(n_components=n_components, random_state=42)), # TruncatedSVD(n_components=n_components, random_state=42)
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
+            (
+                "reducer",
+                TruncatedSVD(n_components=n_components, random_state=42),
+            ),  # TruncatedSVD(n_components=n_components, random_state=42)
+            (
+                "classifier",
+                LinearSVC(
+                    max_iter=max_iter, C=C, random_state=42, class_weight="balanced"
+                ),
+            ),
         ]
         if reduce_f
         else [
             ("preprocessor", preprocessor),
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
+            (
+                "classifier",
+                LinearSVC(
+                    max_iter=max_iter, C=C, random_state=42, class_weight="balanced"
+                ),
+            ),
         ]
     )
 
@@ -251,6 +301,35 @@ def svm_one_hot(
 
     with open(output_file, "wb") as f:
         pickle.dump(pipeline, f)
+
+    return Path(output_file)
+
+
+def embeds(files_to_use, models_path=MODELS_DIR):
+    """Train the best model we found in the preliminary stage with embeddings as inputs.
+    The best model we found is SVC.
+
+
+    Args:
+        files_to_use (list[str]): list of xml files to use for training.
+    """
+    df = concatenate_data(files_to_use)
+    df = df.dropna()
+
+    formatted_texts = ("Aspect: " + df["category"] + " Review: " + df["text"]).tolist()
+
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    X = model.encode(formatted_texts)
+    y = df["polarity"]
+
+    svm_clf = LinearSVC(max_iter=1000, C=1.0, random_state=42, class_weight="balanced")
+    svm_clf.fit(X, y)
+
+    os.makedirs(models_path, exist_ok=True)
+    output_file = os.path.join(models_path, "embeds_model.pkl")
+
+    with open(output_file, "wb") as f:
+        pickle.dump(svm_clf, f)
 
     return Path(output_file)
 
@@ -319,3 +398,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # Testing the embeds function
+    # embeds(["part1.xml", "part2.xml"])
