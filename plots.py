@@ -138,8 +138,10 @@ def plot_parts_sizes():
 
     # tight_layout ensures the angled labels don't get cut off at the bottom
     plt.tight_layout()
-    plt.show()
+
     plt.savefig(str(PROJECT_DIR / f"parts_plot.png"))
+
+    plt.show()
 
 
 def add_labels(x, y):
@@ -165,5 +167,5 @@ def plot_cross_validation_results_all_models():
     plt.tight_layout()
     plt.show()
 
-
 make_dataset_stats_plots()
+#make_results_plots(r"C:\Users\dioni\ekpa-programming-absa\svm_text_features(1, 3)_reduce_f_True_n_components_1000_predictions.csv")

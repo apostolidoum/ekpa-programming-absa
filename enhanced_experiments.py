@@ -1,0 +1,29 @@
+from experiments import cross_validate, save_results
+from train import (
+    svm_one_hot,
+    svm_text_features,
+    )
+
+def main():
+
+    final_results = {}
+
+    models = [
+        {"k1000_SVMOH_N1,3": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
+                              "ngram_range": (1, 3)}},
+        {"k1000_SVMOH_N1,3_LNGRAMS_CCW": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
+                              "ngram_range": (1, 3), "lngrams": True, "custom_context_window": True}},
+        {"k1000_SVMOH_N1,3_LNGRAMS": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
+                              "ngram_range": (1, 3), "lngrams": True, "custom_context_window": False}},
+    ]
+
+    for model_entry in models:
+        print(model_entry.items())
+        model = list(model_entry.values())[0]
+        key = list(model_entry.keys())[0]
+
+        final_results.update({key: cross_validate(**model)})
+        final_results = save_results(final_results, "enhanced_exp_final_results.json")
+
+if __name__ == "__main__":
+    main()

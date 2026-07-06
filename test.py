@@ -2,6 +2,7 @@ import os
 
 from pathlib import Path, PurePath
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn.metrics import (
@@ -55,7 +56,7 @@ def plot_conf_matrix(cm, model_type, metrics_dir=METRICS_DIR):
     return cm
 
 
-def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR):
+def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR, lngrams=False, custom_context_window=False):
     # TODO maybe split ploting logic from accuracy results?
 
     model_id = Path(dir, Path(clf).stem)
@@ -71,7 +72,7 @@ def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR):
 
     print(f"Model Type: {split_id}")
 
-    X, y = split_features_from_target(df, key)
+    X, y = split_features_from_target(df, key, lngrams=lngrams, target_context_window=custom_context_window)
 
     preds = clf.predict(X)
     if preds.ndim > 1:
@@ -82,20 +83,19 @@ def evaluate_model(clf:str, test_set: str, dir=METRICS_DIR):
 
     clr = classification_report(y, preds, output_dict=True)
 
-    return clr["accuracy"], cm, (y, preds)
+    return clr["accuracy"], cm, (y, preds), clr
 
 
 def main():
     print("Example of using the test code.")
-    test_files = ["part1.xml"]
+    test_files = ["part2.xml"]
     train_files = [f for f in full_dataset if f not in test_files]
 
     print(f"Training a model on {train_files}")
-    svm_one_hot(files_to_use=train_files)
-    model_path = "models/svm_onehot_ngram_(1, 3)_max_iter_1000_C_1-0_reduce_f_False_n_components_1000.pkl"
+    model_path = svm_one_hot(files_to_use=train_files, reduce_f=True)
 
-    acc, _, _ = evaluate_model(model_path, "part1.xml")
-    print(f"Accuracy on {test_files} is {acc}")
+    acc, _, _, res = evaluate_model(model_path, "part1.xml")
+    print(f"Results on {test_files} is \n{pd.DataFrame(res)}")
     print(get_feature_dimensionality(model_path))
 
 
