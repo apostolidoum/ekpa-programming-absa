@@ -1,12 +1,13 @@
 import json
 import os
+import re
 import xml.etree.ElementTree as ET
 import pickle
 from collections import Counter
 from pathlib import Path, PurePath
 import pandas as pd
-from constants import DATA_DIR, FULL_DATASET_PATH, PROJECT_DIR
-
+from constants import DATA_DIR, FULL_DATASET_PATH, PROJECT_DIR, full_dataset, nlp
+import re
 
 def xml_to_dataframe(xml_filepath):
     """
@@ -92,6 +93,43 @@ def xml_to_dataframe(xml_filepath):
     return df
 
 
+def lemmatize_sentence(docs):
+    if isinstance(docs, str):
+        docs = [docs]
+    return [" ".join([token.lemma_ for token in doc])
+        for doc in nlp.pipe(docs, batch_size=256)]
+
+def trim_str_around_target(query_str:str, target:str, window=6, token_pattern=r"(?u)\b[\w\d]\w+\b"):
+    query_str = query_str.lower()
+    target = target.lower()
+    tokens = re.findall(token_pattern, query_str) # use default pattern used by tfidf
+
+    if target in query_str:
+        lwin = rwin = window
+        target_tokens = re.findall(token_pattern, target)
+
+        if (len(target_tokens) > 1) or (target_tokens[0] != target):
+            if target_tokens[0]:
+                target = target_tokens[0] #focus on first word of the target
+                rwin += len(target_tokens) - 1
+            else:
+                target = target_tokens[1]
+                rwin += len(target_tokens) - 2
+                lwin += 1
+
+        try:
+            target_idx = tokens.index(target)
+        except:
+            print(tokens, target, target_tokens)
+
+        start_idx = max(target_idx-lwin, 0)
+        end_idx = min(target_idx+rwin, len(tokens))
+
+        return " ".join(tokens[start_idx:end_idx])
+
+    return " ".join(tokens)
+
+
 def save_csv(df, filename, output_dir=DATA_DIR):
     """Save a dataframe to csv at the output directory under the specified filename"""
 
@@ -132,22 +170,29 @@ def get_reducer(clf: str):
     return clf['reducer']
 
 
-def split_features_from_target(df: pd.DataFrame, key="one-hot"):
-    # Explicitly pull your feature columns and your label column by name
+def split_features_from_target(df: pd.DataFrame, key="one-hot", lngrams=False, target_context_window=False):
+
     feature_cols = ["text", "target", "category"]
 
+    df = df.copy()
     df = df.dropna()
 
     X = df[feature_cols]
-    y = df["polarity"]  # Replace "sentiment" with your actual exact target column name
+    y = df["polarity"]
+
+    if target_context_window:
+        combined_docs = X.apply(lambda row: trim_str_around_target(row["text"], row["target"]), axis=1)
+    else:
+        combined_docs = X['text'].str.cat(X['target'], sep=" ")
 
     if key == "one-hot":
-        X["combined_text"] = X["text"] + " " + X["target"]
-        # Explicitly returns a 2-column DataFrame containing all rows
-        X = X[["combined_text", "category"]]
+        X['combined_text'] = lemmatize_sentence(combined_docs.tolist()) if lngrams else combined_docs
+        X = X[["combined_text", "category"]]  # returns a 2-column DataFrame containing all rows
     else:
-        X = X["text"] + " " + X["target"] + " " + X["category"]
+        X["text"] = lemmatize_sentence(combined_docs.tolist()) if lngrams else combined_docs
+        X = X["text"].str.cat(X['category'], sep=" ")
 
+    print(X.head())
     return X, y
 
 
@@ -166,11 +211,12 @@ def get_portions(stuff: list | pd.Series):
     return portions
 
 
-def compute_dataset_statistics(datapath=FULL_DATASET_PATH, portions=False):
-    data: pd.DataFrame = concatenate_data([datapath.name])
+def compute_dataset_statistics(portions=False):
+    data: pd.DataFrame = concatenate_data(full_dataset)
     data = data.dropna()
 
     polarities = data['polarity']
+    sentences = data['sentence_id']
     composite_categories = data['category']
     category_units = [com for cat in composite_categories for com in cat.split('#')]
 
@@ -179,9 +225,11 @@ def compute_dataset_statistics(datapath=FULL_DATASET_PATH, portions=False):
     pol_count = get_portions(polarities) if portions else Counter(polarities)
 
     n_reviews = data.shape[0]
+    unique_sentences = set(sentences.tolist())
 
     stats = {
         "Number of Reviews": n_reviews,
+        "Number of Unique Sentences": len(unique_sentences),
         "Polarity Distribution": pol_count,
         "Composite Categories": cat_count,
         "Category Unit Count": unit_count,

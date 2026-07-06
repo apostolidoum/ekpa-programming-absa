@@ -23,6 +23,8 @@ def logistic_regression_text_features(
     models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
+    lngrams=False,
+    custom_context_window=False,
 ):
     """Trains a logistic regression model using the review, the target and the category as text features.
 
@@ -35,28 +37,28 @@ def logistic_regression_text_features(
     """
     df = concatenate_data(files_to_use)
 
-    X, y = split_features_from_target(df, "text_f")
+    X, y = split_features_from_target(df, "text_f", lngrams, custom_context_window)
 
     pipeline = Pipeline(
         steps=[
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
         ]
         if reduce_f
         else [
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
         ]
     )
 
-    print("Training model...")
+    print("Training LR model...")
     pipeline.fit(X, y)
 
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"{'l' if lngrams else ''}ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}_{'target_context' if custom_context_window else ''}.pkl",
     )
 
     with open(output_file, "wb") as f:
@@ -73,6 +75,8 @@ def logistic_regression_one_hot(
     models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
+    lngrams=False,
+    custom_context_window=False,
 ):
     """Trains a logistic regression model using text features for review+target
     and One-Hot Encoding for the aspect category.
@@ -86,7 +90,7 @@ def logistic_regression_one_hot(
     """
     df = concatenate_data(files_to_use)
 
-    X, y = split_features_from_target(df, "one-hot")
+    X, y = split_features_from_target(df, "one-hot", lngrams, custom_context_window)
 
     # Define how each column should be preprocessed
     preprocessor = ColumnTransformer(
@@ -108,22 +112,22 @@ def logistic_regression_one_hot(
         steps=[
             ("preprocessor", preprocessor),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
         ]
         if reduce_f
         else [
             ("preprocessor", preprocessor),
-            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LogisticRegression(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
         ]
     )
 
-    print("Training model...")
+    print("Training LR model...")
     pipeline.fit(X, y)
 
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"onehot_{'l' if lngrams else ''}ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}_{'target_context' if custom_context_window else ''}.pkl",
     )
 
     with open(output_file, "wb") as f:
@@ -140,6 +144,8 @@ def svm_text_features(
     models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
+    lngrams=False,
+    custom_context_window=False,
 ):
     """Trains a Support Vector Machine (LinearSVC) model using the review,
     the target and the category as text features.
@@ -153,18 +159,18 @@ def svm_text_features(
     """
     df = concatenate_data(files_to_use)
 
-    X, y = split_features_from_target(df, "text_f")
+    X, y = split_features_from_target(df, "text_f", lngrams, custom_context_window)
 
     pipeline = Pipeline(
         steps=[
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word", )),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)),
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LinearSVC(max_iter=max_iter, C=C, class_weight='balanced', random_state=42)),
         ]
         if reduce_f
         else [
             ("tfidf", TfidfVectorizer(ngram_range=ngram_range, analyzer="word")),
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LinearSVC(max_iter=max_iter, C=C, class_weight='balanced', random_state=42)),
         ]
     )
 
@@ -174,7 +180,7 @@ def svm_text_features(
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"svm_ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"svm_{'l' if lngrams else 'n'}gram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}_{'target_context' if custom_context_window else ''}.pkl",
     )
 
     with open(output_file, "wb") as f:
@@ -191,6 +197,8 @@ def svm_one_hot(
     models_path=MODELS_DIR,
     reduce_f=False,
     n_components=1000,
+    lngrams=False,
+    custom_context_window=False,
 ):
     """Trains a Support Vector Machine (LinearSVC) model using text features for review+target
     and One-Hot Encoding for the aspect category.
@@ -204,7 +212,7 @@ def svm_one_hot(
     """
     df = concatenate_data(files_to_use)
 
-    X, y = split_features_from_target(df, "one-hot")
+    X, y = split_features_from_target(df, "one-hot", lngrams, custom_context_window)
 
     # Define how each column should be preprocessed
     preprocessor = ColumnTransformer(
@@ -223,12 +231,12 @@ def svm_one_hot(
         steps=[
             ("preprocessor", preprocessor),
             ("reducer", TruncatedSVD(n_components=n_components, random_state=42)), # TruncatedSVD(n_components=n_components, random_state=42)
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
         ]
         if reduce_f
         else [
             ("preprocessor", preprocessor),
-            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42)),
+            ("classifier", LinearSVC(max_iter=max_iter, C=C, random_state=42, class_weight='balanced')),
         ]
     )
 
@@ -238,7 +246,7 @@ def svm_one_hot(
     os.makedirs(models_path, exist_ok=True)
     output_file = os.path.join(
         models_path,
-        f"svm_onehot_ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}.pkl",
+        f"svm_onehot_{'l' if lngrams else ''}ngram_{ngram_range}_max_iter_{max_iter}_C_{str(C).replace('.', '-')}_reduce_f_{reduce_f}_n_components_{n_components}_{'target_context' if custom_context_window else ''}.pkl",
     )
 
     with open(output_file, "wb") as f:
