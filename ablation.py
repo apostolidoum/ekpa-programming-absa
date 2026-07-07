@@ -9,6 +9,10 @@ def main():
     final_results = {}
 
     models = [
+        {"k1000_SVMOH_N1,1": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
+                              "ngram_range": (1, 1)}},
+        {"BASE_SVMOH_N1,1": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
+                             "ngram_range": (1, 1)}},
         {"k1000_SVMOH_N2,3": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
                               "ngram_range": (2, 3)}},
         {"BASE_SVMOH_N2,3": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,

@@ -39,6 +39,7 @@ def cross_validate(
             ngram_range=ngram_range,
             **kwargs,
         )
+
         m_path = model_path
         acc, cm, (y, preds), report = evaluate_model(model_path, test_set, **kwargs)
         print(report)
@@ -51,6 +52,7 @@ def cross_validate(
                 for i in ([test_set in range(len(categories))], categories, y, preds)
             ]
         )
+
         predictions.append(
             pd.DataFrame(
                 {
@@ -72,9 +74,13 @@ def cross_validate(
     total_confusion = sum(confs)
     plot_conf_matrix(total_confusion, m_path.stem)
     predictions = pd.concat(predictions)
+
+    lgram_tag = "lgram" if kwargs.get('lngrams') == True else ""
+    window_tag = "CW" if kwargs.get('custom_context_window') == True else ""
+
     predictions.to_csv(
         CROSS_VAL_PREDS
-        / f"{model_builder.__name__}{ngram_range}_reduce_f_{reduce_f}_n_components_{n_components}_predictions.csv",
+        / f"{model_builder.__name__}{window_tag}{lgram_tag}{ngram_range}_reduce_f_{reduce_f}_n_components_{n_components}_predictions.csv",
         index=False,
     )
 
@@ -196,98 +202,6 @@ def main():
                 "ngram_range": (1, 3),
             }
         },
-        {
-            "BASE_LRTF_N1,1": {
-                "model_builder": logistic_regression_text_features,
-                "reduce_f": False,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "BASE_LROH_N1,1": {
-                "model_builder": logistic_regression_one_hot,
-                "reduce_f": False,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "BASE_SVMTF_N1,1": {
-                "model_builder": svm_text_features,
-                "reduce_f": False,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "BASE_SVMOH_N1,1": {
-                "model_builder": svm_one_hot,
-                "reduce_f": False,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k1000_LRTF_N1,1": {
-                "model_builder": logistic_regression_text_features,
-                "reduce_f": True,
-                "n_components": 1000,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k1000_LROH_N1,1": {
-                "model_builder": logistic_regression_one_hot,
-                "reduce_f": True,
-                "n_components": 1000,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k1000_SVMTF_N1,1": {
-                "model_builder": svm_text_features,
-                "reduce_f": True,
-                "n_components": 1000,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k1000_SVMOH_N1,1": {
-                "model_builder": svm_one_hot,
-                "reduce_f": True,
-                "n_components": 1000,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k200_LRTF_N1,1": {
-                "model_builder": logistic_regression_text_features,
-                "reduce_f": True,
-                "n_components": 200,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k200_LROH_N1,1": {
-                "model_builder": logistic_regression_one_hot,
-                "reduce_f": True,
-                "n_components": 200,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k200_SVMTF_N1,1": {
-                "model_builder": svm_text_features,
-                "reduce_f": True,
-                "n_components": 200,
-                "ngram_range": (1, 1),
-            }
-        },
-        {
-            "k200_SVMOH_N1,1": {
-                "model_builder": svm_one_hot,
-                "reduce_f": True,
-                "n_components": 200,
-                "ngram_range": (1, 1),
-            }
-        },
     ]
 
     for model_entry in models:
@@ -295,7 +209,7 @@ def main():
         model = list(model_entry.values())[0]
         key = list(model_entry.keys())[0]
 
-        final_results.update({key: cross_validate(**model)[1]})
+        final_results.update({key: cross_validate(**model)})
         print(type(final_results), final_results)
         final_results = save_results(final_results)
 

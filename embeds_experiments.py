@@ -51,7 +51,7 @@ def cross_validate(model_builder=embeds):
     plot_conf_matrix(total_confusion, m_path.stem)
     predictions = pd.concat(predictions)
     predictions.to_csv(
-        CROSS_VAL_PREDS / "embeds_model",
+        CROSS_VAL_PREDS / "embeds_model_predictions.csv",
         index=False,
     )
 
@@ -68,8 +68,8 @@ def main():
         model = list(model_entry.values())[0]
         key = list(model_entry.keys())[0]
 
-        final_results.update({key: cross_validate(**model)[1]})
-        final_results = save_results(final_results, "embeds.json")
+        final_results.update({key: cross_validate(**model)})
+        final_results = save_results(final_results, "embeds_results.json")
 
 
 if __name__ == "__main__":
