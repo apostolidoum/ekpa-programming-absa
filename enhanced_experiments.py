@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from constants import PREPROCESSING_EXP_DIR
+=======
+from constants import METRICS_DIR
+>>>>>>> 34b00c7 (refactor: reorganized experiment to match paper, added new naming conventions to experiments.py, homogenized results json files | misc: minor changes, updating to sync)
 from experiments import cross_validate, save_results
 from train import (
     svm_one_hot,
@@ -47,7 +51,8 @@ def main():
         key = list(model_entry.keys())[0]
 
         final_results.update({key: cross_validate(**model)})
-        final_results = save_results(final_results, "enhanced_exp_final_results.json")
+        final_results = save_results(final_results, METRICS_DIR / "enhanced_exp_final_results.json")
+
 
 
 if __name__ == "__main__":

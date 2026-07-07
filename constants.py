@@ -22,9 +22,10 @@ CROSS_VAL_PREDS = PROJECT_DIR / "cross-validation_results"
 METRICS_DIR = PROJECT_DIR / "metrics"
 MODELS_DIR = PROJECT_DIR / "models"
 HISTORY_DIR = PROJECT_DIR / "history"
+FEATURES_DIR = PROJECT_DIR / "features"
 
-FINAL_RESULTS = PROJECT_DIR / "final_results.json"
-DATASET_STATS = PROJECT_DIR / "stats.json"
+FINAL_RESULTS = METRICS_DIR / "final_results.json"
+DATASET_STATS = DATA_DIR / "stats.json"
 FULL_DATASET_PATH = DATA_DIR / "ABSA16_Restaurants_Train_SB1_v2.xml"
 
 model_name = "en_core_web_sm"
@@ -42,6 +43,7 @@ def main():
     METRICS_DIR.mkdir(parents=True, exist_ok=True)
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    FEATURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 if __name__ == "__main__":

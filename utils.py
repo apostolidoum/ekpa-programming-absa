@@ -94,12 +94,37 @@ def xml_to_dataframe(xml_filepath):
 
 
 def lemmatize_sentence(docs):
+    """
+    Takes a sentence or list of strings as input.
+    Returns a list of lemmatized sentences.
+    """
     if isinstance(docs, str):
         docs = [docs]
     return [" ".join([token.lemma_ for token in doc])
         for doc in nlp.pipe(docs, batch_size=256)]
 
-def trim_str_around_target(query_str:str, target:str, window=6, token_pattern=r"(?u)\b[\w\d]\w+\b"):
+def trim_str_around_target(query_str:str, target:str, window=6, token_pattern="default"):
+    """
+    Applies context window to string, centered around target word.
+    The default token pattern is the same one used by the tf-idf tokenizer, which does not
+    preserve aspect labels separated by #. Token pattern 'better' is recommended, kept the default
+    one for reproducibility.
+
+    Args:
+        query_str (str): query string
+        target (str): target word
+        window (int): window size on either size
+        token_pattern (str): token pattern for tokenization
+    """
+
+    patterns = {
+        'default': r"(?u)\b[\w\d]\w+\b",
+        'better': r"(?u)\b[#\w\d]\w+\b" # preserves aspect units
+    }
+
+    if token_pattern in patterns:
+        token_pattern = patterns[token_pattern]
+
     query_str = query_str.lower()
     target = target.lower()
     tokens = re.findall(token_pattern, query_str) # use default pattern used by tfidf
@@ -148,11 +173,10 @@ def concatenate_data(files_to_use):
     return pd.concat(dataframes, ignore_index=True)
 
 
-def has_preprocessor(clf):
-    return "preprocessor" in clf.named_steps
+def get_feature_dimensionality(clf: str|Path):
+    """Returns tuple containing (n_classes, n_features).
+    Accepts a path as input."""
 
-
-def get_feature_dimensionality(clf: str):
     if "models" in PurePath(clf).parts:
         clf = load_model(clf)
     else:
@@ -161,16 +185,27 @@ def get_feature_dimensionality(clf: str):
     return clf["classifier"].coef_.shape
 
 
-def get_reducer(clf: str):
-    if "models" in PurePath(clf).parts:
-        clf = load_model(clf)
-    else:
-        clf = load_model(Path("models", clf))
-
-    return clf['reducer']
-
-
 def split_features_from_target(df: pd.DataFrame, key="one-hot", lngrams=False, target_context_window=False):
+    """Preprocesses initial dataframe according to model specifications and separates X from y,
+    ignoring all redundant columns.
+
+    The expected dataframe input is of the structure:
+
+    | Column        | Description                                      |
+    |---------------|--------------------------------------------------|
+    | `review_id`   | Unique identifier for the review                 |
+    | `sentence_id` | Unique identifier for the sentence               |
+    | `text`        | The raw sentence text                            |
+    | `target`      | The opinion target (e.g., `"food"`, `"NULL"`)    |
+    | `category`    | The aspect category (e.g., `FOOD#QUALITY`)       |
+    | `polarity`    | Sentiment polarity (`positive`, `negative`, `neutral`) |
+
+    Args:
+        df (pd.DataFrame): Dataframe containing data
+        key (str): aspect label encoding
+        lngrams (bool): use lemma n-grams
+        target_context_window (bool): use context window size around target words
+    """
 
     feature_cols = ["text", "target", "category"]
 
@@ -197,6 +232,7 @@ def split_features_from_target(df: pd.DataFrame, key="one-hot", lngrams=False, t
 
 
 def load_model(path):
+    """Load model from input address"""
     with open(path, "rb") as f:
         clf = pickle.load(f)
 
@@ -204,6 +240,7 @@ def load_model(path):
 
 
 def get_portions(stuff: list | pd.Series):
+    """Convert raw amounts to percentages."""
     counts = Counter(stuff)
     total = counts.total()
     portions = {k: (v, (v / total) * 100) for k, v in counts.items()}
@@ -212,6 +249,11 @@ def get_portions(stuff: list | pd.Series):
 
 
 def compute_dataset_statistics(portions=False):
+    """Exports a full statistical report on the xml dataset to PROJECT_DIR/stats.json.
+
+    Args:
+        portions (bool, optional): Whether to include portion percentages of each category. Defaults to False.
+    """
     data: pd.DataFrame = concatenate_data(full_dataset)
     data = data.dropna()
 
@@ -236,33 +278,21 @@ def compute_dataset_statistics(portions=False):
 
     }
 
-    address = f"{PROJECT_DIR}/stats.json"
+    address = DATA_DIR / "stats.json"
     json.dump(stats, open(address, "w"))
-    print("Statistics saved to " + address)
+    print("Statistics saved to " + str(address))
     return address
 
 
 def get_model_name_from_path(path: Path):
+    """Extract model name from path."""
     model_name = path.stem
     return model_name
 
 
-# def prepare_features(df: pd.DataFrame, key='one-hot'):
-#     # Work on a copy to prevent SettingWithCopyWarning in Pandas
-#     df = df.copy()
-#
-#     if key == 'one-hot':
-#         df["combined_text"] = df["text"] + " " + df["target"]
-#         # Explicitly returns a 2-column DataFrame containing all rows
-#         X = df[["combined_text", "category"]]
-#     else:
-#         X = df["text"] + " " + df["target"] + " " + df["category"]
-#
-#     return X
-
 if __name__ == "__main__":
     # go over all the parts in the data folder and save them to csv
-    print(compute_dataset_statistics())
+    compute_dataset_statistics()
     for i in range(1, 11):
         df = xml_to_dataframe(f"{DATA_DIR}/part{i}.xml")
         save_csv(df, f"part{i}", DATA_DIR)

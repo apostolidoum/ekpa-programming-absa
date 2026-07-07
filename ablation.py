@@ -1,3 +1,4 @@
+from constants import METRICS_DIR
 from experiments import cross_validate, save_results
 from train import (
     svm_one_hot,
@@ -25,7 +26,7 @@ def main():
         key = list(model_entry.keys())[0]
 
         final_results.update({key: cross_validate(**model)})
-        final_results = save_results(final_results, "ablation_final_results.json")
+        final_results = save_results(final_results, METRICS_DIR / "ablation_final_results.json")
 
 if __name__ == "__main__":
     main()
