@@ -305,10 +305,11 @@ def svm_one_hot(
     return Path(output_file)
 
 
-def embeds(files_to_use, models_path=MODELS_DIR):
+def embeds(files_to_use, models_path=MODELS_DIR, **kwargs):
     """Train the best model we found in the preliminary stage with embeddings as inputs.
     The best model we found is SVC.
 
+    kwargs used for argparse compatibility.
 
     Args:
         files_to_use (list[str]): list of xml files to use for training.
@@ -348,7 +349,7 @@ def main():
 
     parser.add_argument(
         "--model",
-        choices=["svm-tf", "svm-oh", "logr-tf", "logr-oh"],
+        choices=["svm-tf", "svm-oh", "logr-tf", "logr-oh", "emb", "embs", "embedding"],
         default="logr-tf",
         help="Model type to use (default: logr-tf)",
     )
@@ -394,6 +395,8 @@ def main():
         _ = logistic_regression_text_features(**common_params)
     elif args.model == "logr-oh":
         _ = logistic_regression_one_hot(**common_params)
+    elif args.model in ("emb", "embs", "embedding"):
+        _ = embeds(**common_params)
 
 
 if __name__ == "__main__":
