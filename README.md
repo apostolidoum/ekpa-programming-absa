@@ -142,5 +142,9 @@ _Default: Path to the BASE SVMOH (1, 3) model._
 ```bash
 uv run feature_importance.py --class-label <...> --model-tag <OPT> --model-path <OPT> [-v]
 ```
+e.g.
+```bash
+uv run feature_importance.py --class-label 0 --model-tag k1000_SVMOH_1-1_lngram --model-path "svm_onehot_lngram_(1, 1)_max_iter_1000_C_1-0_reduce_f_True_n_components_1000_.pkl"
+```
 
 This outputs a `{model-tag}_Class_{int_class-label}_feature_importance.csv` to `features/`.

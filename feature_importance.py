@@ -93,8 +93,7 @@ def main():
     parser.add_argument(
         "--model-path",
         type=str,
-        default=MODELS_DIR
-        / "svm_onehot_ngram_(1, 3)_max_iter_1000_C_1-0_reduce_f_False_n_components_1000_.pkl",
+        default="svm_onehot_ngram_(1, 3)_max_iter_1000_C_1-0_reduce_f_False_n_components_1000_.pkl",
         help="Model path. Default is the path to the BASE SVMOH (1, 3) model.",
     )
 
@@ -107,7 +106,7 @@ def main():
 
     args = parser.parse_args()
     mid = args.model_tag
-    MODEL = args.model_path
+    MODEL = MODELS_DIR / args.model_path
     class_label = args.class_label
 
     label_dictionary = {
