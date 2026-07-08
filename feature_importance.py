@@ -86,7 +86,7 @@ def main():
     parser.add_argument(
         "--model-id",
         type=str,
-        default=str(np.random.randint(1, 1000)),
+        default="",
         help="Model id to disambiguate output file name.",
     )
 
@@ -102,7 +102,7 @@ def main():
     class_label = args.class_label
     class_idx = int(class_label) if len(class_label) == 1 else label_dictionary[class_label]
 
-    MODEL = r"C:\Users\dioni\ekpa-programming-absa\models\svm_onehot_ngram_(1, 3)_max_iter_1000_C_1-0_reduce_f_False_n_components_1000_.pkl"
+    MODEL = r"C:\Users\dioni\ekpa-programming-absa\models\onehot_ngram_(1, 3)_max_iter_1000_C_1-0_reduce_f_False_n_components_1000_.pkl"
     m = load_model(MODEL)
 
     ft = get_top_features_post_reduction(m, class_idx)

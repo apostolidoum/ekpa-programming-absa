@@ -39,7 +39,7 @@ def make_dataset_stats_plots(path=DATASET_STATS):
     ucat = pd.Series(data["Category Unit Count"])
 
     for name, characteristic in zip(
-        ("Polarity Distribution", "Composite Categories Count", "Category Unit Count"), (polarities, ccat, ucat)
+        ("Polarity Distribution", "Aspect Categories", "Category Unit Count"), (polarities, ccat, ucat)
     ):
         x = 5 if name == "Polarity Distribution" else 10
         plt.figure(1, figsize=(x, 5))
@@ -149,13 +149,15 @@ def add_labels(x, y):
         plt.text(i-0.25, y[i], f"{y[i]:.2f}")
 
 
-def plot_cross_validation_results_all_models():
+def plot_cross_validation_results_all_models(results_json = FINAL_RESULTS):
+
     stats = json.load(
         open(
-            FINAL_RESULTS,
+            results_json,
             "r",
         )
     )
+
     plt.figure(1, figsize=(13, 5))
     names = list(stats.keys())
     accuracies = [metrics[1] for key, metrics in stats.items()]
@@ -165,7 +167,9 @@ def plot_cross_validation_results_all_models():
     plt.xlabel("Model")
     plt.ylabel("Accuracy")
     plt.tight_layout()
+
     plt.show()
 
-make_dataset_stats_plots()
-#make_results_plots(r"C:\Users\dioni\ekpa-programming-absa\svm_text_features(1, 3)_reduce_f_True_n_components_1000_predictions.csv")
+#plot_cross_validation_results_all_models(r"C:\Users\dioni\ekpa-programming-absa\final_results.json")
+make_results_plots(r"C:\Users\dioni\ekpa-programming-absa\cross-validation_results\svm_one_hotCWlgram(1, 1)_reduce_f_False_n_components_1000_predictions.csv")
+#make_dataset_stats_plots()
