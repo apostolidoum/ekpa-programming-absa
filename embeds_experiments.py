@@ -1,9 +1,10 @@
-from train import embeds
-from constants import full_dataset, CROSS_VAL_PREDS
-from test import evaluate_embeds_model, plot_conf_matrix
-from utils import concatenate_data
 import pandas as pd
+
+from constants import CROSS_VAL_PREDS, METRICS_DIR, full_dataset
 from experiments import save_results
+from test import evaluate_embeds_model, plot_conf_matrix
+from train import embeds
+from utils import concatenate_data
 
 
 def cross_validate(model_builder=embeds):
@@ -69,7 +70,7 @@ def main():
         key = list(model_entry.keys())[0]
 
         final_results.update({key: cross_validate(**model)})
-        final_results = save_results(final_results, "embeds_results.json")
+        final_results = save_results(final_results, METRICS_DIR / "embeds_results.json")
 
 
 if __name__ == "__main__":

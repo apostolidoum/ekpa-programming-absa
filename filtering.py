@@ -1,35 +1,45 @@
-import pandas as pd
 from collections import Counter
+
+import pandas as pd
 
 from constants import full_dataset
 from utils import concatenate_data, get_portions
 
 
 def filter_by_component(df, component):
-    return df[df['category'].str.contains(component, na=False)]
+    return df[df["category"].str.contains(component, na=False)]
+
 
 def get_category_components(categories):
-    return [com for cat in categories for com in cat.split('#')]
+    return [com for cat in categories for com in cat.split("#")]
+
 
 data: pd.DataFrame = concatenate_data(full_dataset)
 pruned_data = data.dropna()
 
-polarities = pruned_data['polarity']
-reviews = pruned_data['review_id']
-texts = data['sentence_id']
-composite_categories = pruned_data['category']
+polarities = pruned_data["polarity"]
+reviews = pruned_data["review_id"]
+texts = data["sentence_id"]
+composite_categories = pruned_data["category"]
 
-category_units = [com for cat in composite_categories if isinstance(cat, str) for com in cat.split('#')]
+category_units = [
+    com
+    for cat in composite_categories
+    if isinstance(cat, str)
+    for com in cat.split("#")
+]
 
-portions=False
+portions = False
 unit_count = get_portions(category_units) if portions else Counter(category_units)
-cat_count = get_portions(composite_categories) if portions else Counter(composite_categories)
+cat_count = (
+    get_portions(composite_categories) if portions else Counter(composite_categories)
+)
 pol_count = get_portions(polarities) if portions else Counter(polarities)
 
 n_entries = pruned_data.shape[0]
 n_reviews = len(set(reviews.tolist()))
 unique_sentences = set(texts.tolist())
-___after_drop_na = set(pruned_data.dropna()['sentence_id'].tolist())
+___after_drop_na = set(pruned_data.dropna()["sentence_id"].tolist())
 
 stats = {
     "Number of Entries": n_entries,

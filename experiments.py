@@ -1,18 +1,16 @@
-from pathlib import Path
+import json
 
 import pandas as pd
 
+from constants import CROSS_VAL_PREDS, FINAL_RESULTS, full_dataset
 from test import evaluate_model, plot_conf_matrix
-from constants import full_dataset, PROJECT_DIR, CROSS_VAL_PREDS, FINAL_RESULTS
 from train import (
-    svm_one_hot,
-    svm_text_features,
     logistic_regression_one_hot,
     logistic_regression_text_features,
+    svm_one_hot,
+    svm_text_features,
 )
-import json
-
-from utils import concatenate_data, xml_to_dataframe
+from utils import concatenate_data
 
 
 def cross_validate(
@@ -75,8 +73,8 @@ def cross_validate(
     plot_conf_matrix(total_confusion, m_path.stem)
     predictions = pd.concat(predictions)
 
-    lgram_tag = "lgram" if kwargs.get('lngrams') == True else ""
-    window_tag = "CW" if kwargs.get('custom_context_window') == True else ""
+    lgram_tag = "lgram" if kwargs.get("lngrams") == True else ""
+    window_tag = "CW" if kwargs.get("custom_context_window") == True else ""
 
     predictions.to_csv(
         CROSS_VAL_PREDS

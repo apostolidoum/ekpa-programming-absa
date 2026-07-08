@@ -1,36 +1,32 @@
 import os
-
 from pathlib import Path, PurePath
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import sklearn
 from matplotlib import pyplot as plt
+from sentence_transformers import SentenceTransformer
 from sklearn.metrics import (
     classification_report,
     confusion_matrix,
 )
 
-from constants import full_dataset, METRICS_DIR, PROJECT_DIR
+from constants import METRICS_DIR, full_dataset
 from train import (
     svm_one_hot,
 )
-
 from utils import (
     concatenate_data,
     get_feature_dimensionality,
-    has_preprocessor,
     load_model,
     split_features_from_target,
 )
-from sentence_transformers import SentenceTransformer
 
 
 def build_model(function, train_set, **kwargs):
     path = function(train_set, **kwargs)
     return path
-
-
-from train import embeds
 
 
 def plot_conf_matrix(cm, model_type, metrics_dir=METRICS_DIR):
@@ -71,12 +67,12 @@ def evaluate_model(
     split_id = str(model_id.stem) + test_set.rstrip(".xml")
 
     if "models" in PurePath(clf).parts:
-        clf = load_model(clf)
+        clf: sklearn.pipeline.Pipeline = load_model(clf)
     else:
-        clf = load_model(os.path.join("models", clf))
+        clf: sklearn.pipeline.Pipeline = load_model(os.path.join("models", clf))
 
     df = concatenate_data([test_set])
-    key = "one-hot" if has_preprocessor(clf) else "text_f"
+    key = "one-hot" if "preprocessor" in clf.named_steps else "text_f"
 
     print(f"Model Type: {split_id}")
 

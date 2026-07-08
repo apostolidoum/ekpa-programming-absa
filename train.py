@@ -3,6 +3,7 @@ import os
 import pickle
 from pathlib import Path
 
+from sentence_transformers import SentenceTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -11,9 +12,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import LinearSVC
 
-from constants import full_dataset, MODELS_DIR
+from constants import MODELS_DIR, full_dataset
 from utils import concatenate_data, split_features_from_target
-from sentence_transformers import SentenceTransformer
 
 
 def logistic_regression_text_features(
