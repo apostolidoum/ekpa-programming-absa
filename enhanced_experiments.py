@@ -1,48 +1,149 @@
-<<<<<<< HEAD
-from constants import PREPROCESSING_EXP_DIR
-=======
 from constants import METRICS_DIR
->>>>>>> 34b00c7 (refactor: reorganized experiment to match paper, added new naming conventions to experiments.py, homogenized results json files | misc: minor changes, updating to sync)
 from experiments import cross_validate, save_results
-from train import (
-    svm_one_hot,
-    svm_text_features,
-)
+from train import svm_one_hot
 
 
 def main():
     final_results = {}
 
     models = [
-        {"k1000_SVMOH_N1,3": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                              "ngram_range": (1, 3)}},
-        {"k1000_SVMOH_N1,3_CCW": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                                  "ngram_range": (1, 3), "lngrams": False, "custom_context_window": True}},
-        {"k1000_SVMOH_N1,3_LNGRAMS_CCW": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                                          "ngram_range": (1, 3), "lngrams": True, "custom_context_window": True}},
-        {"k1000_SVMOH_N1,3_LNGRAMS": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                                      "ngram_range": (1, 3), "lngrams": True, "custom_context_window": False}},
-        {"BASE_SVMOH_N1,3_CCW": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
-                                 "ngram_range": (1, 3), "lngrams": False, "custom_context_window": True}},
-        {"BASE_SVMOH_N1,3_LNGRAMS_CCW": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
-                                         "ngram_range": (1, 3), "lngrams": True, "custom_context_window": True}},
-        {"BASE_SVMOH_N1,3_LNGRAMS": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
-                                     "ngram_range": (1, 3), "lngrams": True, "custom_context_window": False}},
-###########################################################
-        {"k1000_SVMOH_N1,1": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                              "ngram_range": (1, 1)}},
-        {"k1000_SVMOH_N1,1_CCW": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                                  "ngram_range": (1, 1), "lngrams": False, "custom_context_window": True}},
-        {"k1000_SVMOH_N1,1_LNGRAMS_CCW": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                                          "ngram_range": (1, 1), "lngrams": True, "custom_context_window": True}},
-        {"k1000_SVMOH_N1,1_LNGRAMS": {"model_builder": svm_one_hot, "reduce_f": True, "n_components": 1000,
-                                      "ngram_range": (1, 1), "lngrams": True, "custom_context_window": False}},
-        {"BASE_SVMOH_N1,1_CCW": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
-                                 "ngram_range": (1, 1), "lngrams": False, "custom_context_window": True}},
-        {"BASE_SVMOH_N1,1_LNGRAMS_CCW": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
-                                         "ngram_range": (1, 1), "lngrams": True, "custom_context_window": True}},
-        {"BASE_SVMOH_N1,1_LNGRAMS": {"model_builder": svm_one_hot, "reduce_f": False, "n_components": 1000,
-                                     "ngram_range": (1, 1), "lngrams": True, "custom_context_window": False}},
+        {
+            "k1000_SVMOH_N1,3": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+            }
+        },
+        {
+            "k1000_SVMOH_N1,3_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+                "lngrams": False,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "k1000_SVMOH_N1,3_LNGRAMS_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+                "lngrams": True,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "k1000_SVMOH_N1,3_LNGRAMS": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+                "lngrams": True,
+                "custom_context_window": False,
+            }
+        },
+        {
+            "BASE_SVMOH_N1,3_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": False,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+                "lngrams": False,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "BASE_SVMOH_N1,3_LNGRAMS_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": False,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+                "lngrams": True,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "BASE_SVMOH_N1,3_LNGRAMS": {
+                "model_builder": svm_one_hot,
+                "reduce_f": False,
+                "n_components": 1000,
+                "ngram_range": (1, 3),
+                "lngrams": True,
+                "custom_context_window": False,
+            }
+        },
+        ###########################################################
+        {
+            "k1000_SVMOH_N1,1": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+            }
+        },
+        {
+            "k1000_SVMOH_N1,1_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+                "lngrams": False,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "k1000_SVMOH_N1,1_LNGRAMS_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+                "lngrams": True,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "k1000_SVMOH_N1,1_LNGRAMS": {
+                "model_builder": svm_one_hot,
+                "reduce_f": True,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+                "lngrams": True,
+                "custom_context_window": False,
+            }
+        },
+        {
+            "BASE_SVMOH_N1,1_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": False,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+                "lngrams": False,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "BASE_SVMOH_N1,1_LNGRAMS_CCW": {
+                "model_builder": svm_one_hot,
+                "reduce_f": False,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+                "lngrams": True,
+                "custom_context_window": True,
+            }
+        },
+        {
+            "BASE_SVMOH_N1,1_LNGRAMS": {
+                "model_builder": svm_one_hot,
+                "reduce_f": False,
+                "n_components": 1000,
+                "ngram_range": (1, 1),
+                "lngrams": True,
+                "custom_context_window": False,
+            }
+        },
     ]
 
     for model_entry in models:
@@ -51,8 +152,9 @@ def main():
         key = list(model_entry.keys())[0]
 
         final_results.update({key: cross_validate(**model)})
-        final_results = save_results(final_results, METRICS_DIR / "enhanced_exp_final_results.json")
-
+        final_results = save_results(
+            final_results, METRICS_DIR / "enhanced_exp_final_results.json"
+        )
 
 
 if __name__ == "__main__":

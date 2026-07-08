@@ -1,13 +1,15 @@
 import json
 import os
+import pickle
 import re
 import xml.etree.ElementTree as ET
-import pickle
 from collections import Counter
 from pathlib import Path, PurePath
+
 import pandas as pd
-from constants import DATA_DIR, FULL_DATASET_PATH, PROJECT_DIR, full_dataset, nlp
-import re
+
+from constants import DATA_DIR, full_dataset, nlp
+
 
 def xml_to_dataframe(xml_filepath):
     """
@@ -100,10 +102,15 @@ def lemmatize_sentence(docs):
     """
     if isinstance(docs, str):
         docs = [docs]
-    return [" ".join([token.lemma_ for token in doc])
-        for doc in nlp.pipe(docs, batch_size=256)]
+    return [
+        " ".join([token.lemma_ for token in doc])
+        for doc in nlp.pipe(docs, batch_size=256)
+    ]
 
-def trim_str_around_target(query_str:str, target:str, window=6, token_pattern="default"):
+
+def trim_str_around_target(
+    query_str: str, target: str, window=6, token_pattern="default"
+):
     """
     Applies context window to string, centered around target word.
     The default token pattern is the same one used by the tf-idf tokenizer, which does not
@@ -118,8 +125,8 @@ def trim_str_around_target(query_str:str, target:str, window=6, token_pattern="d
     """
 
     patterns = {
-        'default': r"(?u)\b[\w\d]\w+\b",
-        'better': r"(?u)\b[#\w\d]\w+\b" # preserves aspect units
+        "default": r"(?u)\b[\w\d]\w+\b",
+        "better": r"(?u)\b[#\w\d]\w+\b",  # preserves aspect units
     }
 
     if token_pattern in patterns:
@@ -127,7 +134,7 @@ def trim_str_around_target(query_str:str, target:str, window=6, token_pattern="d
 
     query_str = query_str.lower()
     target = target.lower()
-    tokens = re.findall(token_pattern, query_str) # use default pattern used by tfidf
+    tokens = re.findall(token_pattern, query_str)  # use default pattern used by tfidf
 
     if target in query_str:
         lwin = rwin = window
@@ -135,7 +142,7 @@ def trim_str_around_target(query_str:str, target:str, window=6, token_pattern="d
 
         if (len(target_tokens) > 1) or (target_tokens[0] != target):
             if target_tokens[0]:
-                target = target_tokens[0] #focus on first word of the target
+                target = target_tokens[0]  # focus on first word of the target
                 rwin += len(target_tokens) - 1
             else:
                 target = target_tokens[1]
@@ -147,8 +154,8 @@ def trim_str_around_target(query_str:str, target:str, window=6, token_pattern="d
         except:
             print(tokens, target, target_tokens)
 
-        start_idx = max(target_idx-lwin, 0)
-        end_idx = min(target_idx+rwin, len(tokens))
+        start_idx = max(target_idx - lwin, 0)
+        end_idx = min(target_idx + rwin, len(tokens))
 
         return " ".join(tokens[start_idx:end_idx])
 
@@ -173,7 +180,7 @@ def concatenate_data(files_to_use):
     return pd.concat(dataframes, ignore_index=True)
 
 
-def get_feature_dimensionality(clf: str|Path):
+def get_feature_dimensionality(clf: str | Path):
     """Returns tuple containing (n_classes, n_features).
     Accepts a path as input."""
 
@@ -185,7 +192,9 @@ def get_feature_dimensionality(clf: str|Path):
     return clf["classifier"].coef_.shape
 
 
-def split_features_from_target(df: pd.DataFrame, key="one-hot", lngrams=False, target_context_window=False):
+def split_features_from_target(
+    df: pd.DataFrame, key="one-hot", lngrams=False, target_context_window=False
+):
     """Preprocesses initial dataframe according to model specifications and separates X from y,
     ignoring all redundant columns.
 
@@ -216,16 +225,24 @@ def split_features_from_target(df: pd.DataFrame, key="one-hot", lngrams=False, t
     y = df["polarity"]
 
     if target_context_window:
-        combined_docs = X.apply(lambda row: trim_str_around_target(row["text"], row["target"]), axis=1)
+        combined_docs = X.apply(
+            lambda row: trim_str_around_target(row["text"], row["target"]), axis=1
+        )
     else:
-        combined_docs = X['text'].str.cat(X['target'], sep=" ")
+        combined_docs = X["text"].str.cat(X["target"], sep=" ")
 
     if key == "one-hot":
-        X['combined_text'] = lemmatize_sentence(combined_docs.tolist()) if lngrams else combined_docs
-        X = X[["combined_text", "category"]]  # returns a 2-column DataFrame containing all rows
+        X["combined_text"] = (
+            lemmatize_sentence(combined_docs.tolist()) if lngrams else combined_docs
+        )
+        X = X[
+            ["combined_text", "category"]
+        ]  # returns a 2-column DataFrame containing all rows
     else:
-        X["text"] = lemmatize_sentence(combined_docs.tolist()) if lngrams else combined_docs
-        X = X["text"].str.cat(X['category'], sep=" ")
+        X["text"] = (
+            lemmatize_sentence(combined_docs.tolist()) if lngrams else combined_docs
+        )
+        X = X["text"].str.cat(X["category"], sep=" ")
 
     print(X.head())
     return X, y
@@ -257,13 +274,17 @@ def compute_dataset_statistics(portions=False):
     data: pd.DataFrame = concatenate_data(full_dataset)
     data = data.dropna()
 
-    polarities = data['polarity']
-    sentences = data['sentence_id']
-    composite_categories = data['category']
-    category_units = [com for cat in composite_categories for com in cat.split('#')]
+    polarities = data["polarity"]
+    sentences = data["sentence_id"]
+    composite_categories = data["category"]
+    category_units = [com for cat in composite_categories for com in cat.split("#")]
 
     unit_count = get_portions(category_units) if portions else Counter(category_units)
-    cat_count = get_portions(composite_categories) if portions else Counter(composite_categories)
+    cat_count = (
+        get_portions(composite_categories)
+        if portions
+        else Counter(composite_categories)
+    )
     pol_count = get_portions(polarities) if portions else Counter(polarities)
 
     n_reviews = data.shape[0]
@@ -275,7 +296,6 @@ def compute_dataset_statistics(portions=False):
         "Polarity Distribution": pol_count,
         "Composite Categories": cat_count,
         "Category Unit Count": unit_count,
-
     }
 
     address = DATA_DIR / "stats.json"

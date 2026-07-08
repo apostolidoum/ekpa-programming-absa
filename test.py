@@ -1,28 +1,27 @@
 import os
-
 from pathlib import Path, PurePath
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import sklearn
 from matplotlib import pyplot as plt
+from sentence_transformers import SentenceTransformer
 from sklearn.metrics import (
     classification_report,
     confusion_matrix,
 )
 
-from constants import full_dataset, METRICS_DIR, PROJECT_DIR
+from constants import METRICS_DIR, full_dataset
 from train import (
     svm_one_hot,
 )
-
 from utils import (
     concatenate_data,
     get_feature_dimensionality,
     load_model,
     split_features_from_target,
 )
-from sentence_transformers import SentenceTransformer
 
 
 def build_model(function, train_set, **kwargs):

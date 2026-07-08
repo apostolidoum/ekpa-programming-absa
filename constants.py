@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import spacy
 from spacy.cli import download
 from spacy.util import is_package

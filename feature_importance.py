@@ -1,7 +1,9 @@
 import argparse
+
 import numpy as np
 import sklearn
-from constants import MODELS_DIR, FEATURES_DIR
+
+from constants import FEATURES_DIR, MODELS_DIR
 from utils import *
 
 

@@ -3,9 +3,9 @@ from collections import Counter
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from matplotlib.pyplot import figure
+
+from constants import DATASET_STATS, FINAL_RESULTS, PROJECT_DIR, full_dataset
 from utils import concatenate_data
-from constants import PROJECT_DIR, full_dataset, FINAL_RESULTS, DATASET_STATS
 
 
 def group_small_slices(counter_obj, threshold_percent=0.03):
@@ -39,7 +39,8 @@ def make_dataset_stats_plots(path=DATASET_STATS):
     ucat = pd.Series(data["Category Unit Count"])
 
     for name, characteristic in zip(
-        ("Polarity Distribution", "Aspect Categories", "Category Unit Count"), (polarities, ccat, ucat)
+        ("Polarity Distribution", "Aspect Categories", "Category Unit Count"),
+        (polarities, ccat, ucat),
     ):
         x = 5 if name == "Polarity Distribution" else 10
         plt.figure(1, figsize=(x, 5))
@@ -57,13 +58,15 @@ def make_dataset_stats_plots(path=DATASET_STATS):
         plt.show()
 
 
-def make_results_plots(
-    path, dataset_stats=DATASET_STATS, split_category_label=False
-):
+def make_results_plots(path, dataset_stats=DATASET_STATS, split_category_label=False):
     full_data = json.load(open(dataset_stats, "r"))
     predictions_data = pd.read_csv(path)
 
-    full_category_counts = Counter(full_data["Category Unit Count"]) if split_category_label else Counter(full_data["Composite Categories"])
+    full_category_counts = (
+        Counter(full_data["Category Unit Count"])
+        if split_category_label
+        else Counter(full_data["Composite Categories"])
+    )
 
     wrong_responses = predictions_data[
         predictions_data["truth"] != predictions_data["preds"]
@@ -102,7 +105,7 @@ def make_results_plots(
         rotatelabels=True,
         labeldistance=1,
     )
-    #ax1.set_title("Full Category Counts")
+    # ax1.set_title("Full Category Counts")
 
     ax2.pie(
         wrong_values,
@@ -114,7 +117,7 @@ def make_results_plots(
         rotatelabels=True,
         labeldistance=1,
     )
-    #ax2.set_title("Wrong Category Counts")
+    # ax2.set_title("Wrong Category Counts")
 
     plt.suptitle("Category Distribution Comparison", fontsize=16)
     plt.tight_layout()
@@ -146,10 +149,10 @@ def plot_parts_sizes():
 
 def add_labels(x, y):
     for i in range(len(x)):
-        plt.text(i-0.25, y[i], f"{y[i]:.2f}")
+        plt.text(i - 0.25, y[i], f"{y[i]:.2f}")
 
 
-def plot_cross_validation_results_all_models(results_json = FINAL_RESULTS):
+def plot_cross_validation_results_all_models(results_json=FINAL_RESULTS):
 
     stats = json.load(
         open(
@@ -170,6 +173,9 @@ def plot_cross_validation_results_all_models(results_json = FINAL_RESULTS):
 
     plt.show()
 
-#plot_cross_validation_results_all_models(r"C:\Users\dioni\ekpa-programming-absa\final_results.json")
-make_results_plots(r"C:\Users\dioni\ekpa-programming-absa\cross-validation_results\svm_one_hotCWlgram(1, 1)_reduce_f_False_n_components_1000_predictions.csv")
-#make_dataset_stats_plots()
+
+# plot_cross_validation_results_all_models(r"C:\Users\dioni\ekpa-programming-absa\final_results.json")
+make_results_plots(
+    r"C:\Users\dioni\ekpa-programming-absa\cross-validation_results\svm_one_hotCWlgram(1, 1)_reduce_f_False_n_components_1000_predictions.csv"
+)
+# make_dataset_stats_plots()

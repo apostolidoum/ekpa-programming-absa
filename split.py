@@ -1,5 +1,5 @@
-import xml.etree.ElementTree as ET
 import math
+import xml.etree.ElementTree as ET
 
 
 def split_reviews_xml(input_filename, output_dir, chunk_size=35):
