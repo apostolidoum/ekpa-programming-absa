@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from constants import DATASET_STATS, FINAL_RESULTS, PROJECT_DIR, full_dataset
 from utils import concatenate_data
 
+# These functions only work with some manual labor.
 
 def group_small_slices(counter_obj, threshold_percent=0.03):
     """
@@ -173,9 +174,3 @@ def plot_cross_validation_results_all_models(results_json=FINAL_RESULTS):
 
     plt.show()
 
-
-# plot_cross_validation_results_all_models(r"C:\Users\dioni\ekpa-programming-absa\final_results.json")
-make_results_plots(
-    r"C:\Users\dioni\ekpa-programming-absa\cross-validation_results\svm_one_hotCWlgram(1, 1)_reduce_f_False_n_components_1000_predictions.csv"
-)
-# make_dataset_stats_plots()
